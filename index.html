@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stammnummer Generator</title>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2f5;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .stammnummer-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stammnummer-container h3 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .nummer-group {
+            margin-bottom: 20px;
+        }
+
+        .nummer-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .nummer-display {
+            background: white;
+            padding: 12px 15px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .generated-nummer {
+            font-weight: bold;
+            font-size: 1.8em;
+            color: #2c3e50;
+            font-family: "Courier New", monospace;
+            letter-spacing: 1px;
+            flex: 1;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            background: #ecf0f1;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            height: 44px;
+        }
+
+        .copy-btn:hover {
+            background: #bdc3c7;
+            color: #333;
+        }
+
+        .copy-btn.copied {
+            background: #27ae60;
+            color: white;
+        }
+
+        .copy-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .copy-btn .check-icon {
+            display: none;
+        }
+
+        .copy-btn.copied .copy-icon {
+            display: none;
+        }
+
+        .copy-btn.copied .check-icon {
+            display: block;
+        }
+
+        #generateBtnAll {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        #generateBtnAll:hover {
+            background: #2980b9;
+        }
+
+        .info-text {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="stammnummer-container">
+    <h3>Stammnummer / Serial Number Generator</h3>
+
+    <div class="nummer-group">
+        <div class="nummer-label">9-digit Serial Number</div>
+
+        <div class="nummer-display">
+            <div id="generatedStammnummer9" class="generated-nummer"></div>
+
+            <button id="copyBtn9" class="copy-btn" title="In Zwischenablage kopieren">
+                <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+
+                <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="nummer-group">
+        <div class="nummer-label">12-digit Serial Number</div>
+
+        <div class="nummer-display">
+            <div id="generatedStammnummer12" class="generated-nummer"></div>
+
+            <button id="copyBtn12" class="copy-btn" title="In Zwischenablage kopieren">
+                <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+
+                <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <button id="generateBtnAll">Generate new Serial Numbers</button>
+
+    <div class="info-text">
+        Generates valid serial numbers with checksum validation.
+    </div>
+</div>
+
+<script>
+    (() => {
+        const stammnummerFaktoren9 = [3, 2, 7, 6, 5, 4, 3, 2];
+        const stammnummerFaktoren12 = [6, 5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
+
+        const generateStammnummer9 = () => {
+            const min = 10000000;
+            const max = 99999999;
+
+            const randomNr =
+                Math.floor(Math.random() * (max - min + 1)) + min;
+
+            return `${randomNr}${createPruefziffer9(randomNr)}`;
+        };
+
+        const generateStammnummer12 = () => {
+            const min = 10000000000;
+            const max = 99999999999;
+
+            const randomNr =
+                Math.floor(Math.random() * (max - min + 1)) + min;
+
+            return `${randomNr}${createPruefziffer12(randomNr)}`;
+        };
+
+        const createPruefziffer9 = (stammNummer) => {
+            const stammNr = stammNummer.toString();
+
+            let pruefWert = 0;
+
+            stammnummerFaktoren9.forEach((faktor, index) => {
+                pruefWert += parseInt(stammNr.charAt(index)) * faktor;
+            });
+
+            let pruefziffer = pruefWert % 11;
+
+            if (pruefziffer > 9) {
+                pruefziffer = 0;
+            }
+
+            return pruefziffer;
+        };
+
+        const createPruefziffer12 = (stammNummer) => {
+            const stammNr = stammNummer.toString();
+
+            let pruefWert = 0;
+
+            stammnummerFaktoren12.forEach((faktor, index) => {
+                pruefWert += parseInt(stammNr.charAt(index)) * faktor;
+            });
+
+            let pruefziffer = pruefWert % 11;
+
+            if (pruefziffer > 9) {
+                pruefziffer = 0;
+            }
+
+            return pruefziffer;
+        };
+
+        const formatNumber = (number, digits) => {
+            if (digits === 9) {
+                return number.replace(
+                    /(\d{3})(\d{3})(\d{3})/,
+                    "$1.$2.$3"
+                );
+            }
+
+            return number.replace(
+                /(\d{3})(\d{3})(\d{3})(\d{3})/,
+                "$1.$2.$3.$4"
+            );
+        };
+
+        const copyToClipboard = async (value, buttonId) => {
+            try {
+                await navigator.clipboard.writeText(value);
+
+                $(`#${buttonId}`).addClass("copied");
+
+                setTimeout(() => {
+                    $(`#${buttonId}`).removeClass("copied");
+                }, 1500);
+            } catch (e) {
+                console.error("Copy failed", e);
+            }
+        };
+
+        $(document).ready(() => {
+            const initialNummer9 = generateStammnummer9();
+            const initialNummer12 = generateStammnummer12();
+
+            $("#generatedStammnummer9")
+                .html(formatNumber(initialNummer9, 9))
+                .attr("data-value", initialNummer9);
+
+            $("#generatedStammnummer12")
+                .html(formatNumber(initialNummer12, 12))
+                .attr("data-value", initialNummer12);
+
+            $("#generateBtnAll").click(() => {
+                const neueNummer9 = generateStammnummer9();
+                const neueNummer12 = generateStammnummer12();
+
+                $("#generatedStammnummer9, #generatedStammnummer12")
+                    .fadeOut(100, function () {
+                        $("#generatedStammnummer9")
+                            .html(formatNumber(neueNummer9, 9))
+                            .attr("data-value", neueNummer9)
+                            .fadeIn(100);
+
+                        $("#generatedStammnummer12")
+                            .html(formatNumber(neueNummer12, 12))
+                            .attr("data-value", neueNummer12)
+                            .fadeIn(100);
+                    });
+            });
+
+            $("#copyBtn9").click(() => {
+                const value = $("#generatedStammnummer9").attr("data-value");
+
+                copyToClipboard(value, "copyBtn9");
+            });
+
+            $("#copyBtn12").click(() => {
+                const value = $("#generatedStammnummer12").attr("data-value");
+
+                copyToClipboard(value, "copyBtn12");
+            });
+        });
+    })();
+</script>
+
+</body>
+</html>
